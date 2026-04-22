@@ -6,28 +6,36 @@ echo  JEUS Log Analyzer - Starting...
 echo =================================================
 echo.
 
-if not exist "venv" (
-    echo [Setup] First run: installing required packages...
-    python -m venv venv
-    call venv\Scripts\activate.bat
-
-    if exist "packages" (
-        echo [Setup] Installing from local packages folder (offline mode)...
-        pip install --no-index --find-links=packages openpyxl
-    ) else (
-        echo [Setup] Downloading from internet...
-        pip install openpyxl --quiet
-    )
-
-    echo [Setup] Done!
-    echo.
-) else (
-    call venv\Scripts\activate.bat
+echo [1/3] Checking Python...
+python --version
+if %ERRORLEVEL% neq 0 (
+    echo ERROR: Python not found. Please install Python first.
+    pause
+    exit /b 1
 )
 
-echo [Run] Launching program...
-python main.py
+echo [2/3] Installing required packages...
+if exist "packages" (
+    echo     Installing from local packages folder (offline)...
+    python -m pip install --no-index --find-links=packages openpyxl
+) else (
+    echo     Downloading from internet...
+    python -m pip install openpyxl --quiet
+)
+if %ERRORLEVEL% neq 0 (
+    echo ERROR: Package installation failed.
+    pause
+    exit /b 1
+)
 
+echo [3/3] Launching program...
 echo.
-echo Program closed.
+python main.py
+if %ERRORLEVEL% neq 0 (
+    echo.
+    echo ERROR: Program crashed. See message above.
+    pause
+    exit /b 1
+)
+
 pause
